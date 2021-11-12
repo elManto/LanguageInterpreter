@@ -1,6 +1,9 @@
 //pub mod token;
-#[path = "./token.rs"]
-mod token;
+//#[path = "./token.rs"]
+pub mod token;
+
+use self::token::Token;
+use self::token::Token::*;
 
 
 
@@ -35,6 +38,7 @@ impl Lexer {
      let characters: Vec<char> = self.text.chars().collect();
      self.current = Some(characters[self.pos]);
     }
+
   }
 
   fn number(&mut self) -> token::Token {
@@ -59,6 +63,7 @@ impl Lexer {
 
   
   pub fn get_next_token(&mut self) -> Option<token::Token> {
+
     while self.current != None {
       let next_token: token::Token =  match self.current.unwrap() {
         char if char.is_whitespace() => {
@@ -66,7 +71,8 @@ impl Lexer {
           continue;
         }
         char if char.is_digit(10) => {
-          self.number()
+          let token = self.number();
+          token
         }
         '+' => {
           self.advance();

@@ -1,9 +1,6 @@
+mod parser;
 
-//mod lexer;
-#[path = "./lexer.rs"]
-//use self::lexer;
-mod lexer;
-
+use parser::Parser;
 use std::fs;
 use std::env;
 use std::fs::File;
@@ -15,9 +12,6 @@ fn read_from_file(filename: &str) -> std::io::Result<String> {
   let file = File::open(filename)?;
   let mut contents = String::new();
   contents = fs::read_to_string(filename).expect("Unable to read");
-
-
-
   Ok(contents)
 }
 
@@ -29,9 +23,16 @@ fn main() {
   
 
   println!("Processing file: {}", filename);
-  let mut lexer = lexer::Lexer::new(source.unwrap().as_str());
-  let token = lexer.get_next_token();
-  println!("Got token {}", token.unwrap());
+  let mut parser = parser::Parser::new(source.unwrap().as_str());
+  //let mut lexer = lexer::Lexer::new(source.unwrap().as_str());
+  //let mut token = lexer.get_next_token().unwrap();
+  //let mut i = 0;
+  //while (i < 10) {
+  //  println!("Got token {}", token);
+
+  //  token = lexer.get_next_token().unwrap();
+  //  i += 1;
+  //}
 
 //  let mut interpreter = Interpreter::new(source.as_str());
 //  match interpreter.interpret() {
