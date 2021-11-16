@@ -82,7 +82,23 @@ impl Lexer {
           self.advance();
           token::Token::Minus
         }
-        unknown => {
+        '*' => {
+          self.advance();
+          token::Token::Multiply
+        }
+        '/' => {
+          self.advance();
+          token::Token::IntegerDivision
+        }
+        '(' => {
+          self.advance();
+          token::Token::LParen
+        }
+        ')' => {
+          self.advance();
+          token::Token::RParen
+        }
+        _ => {
           panic!("Unknown token: {}", self.current.unwrap())
         }
       };

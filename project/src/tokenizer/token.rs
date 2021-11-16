@@ -9,6 +9,8 @@ pub enum Token {
   Multiply,
   IntegerDivision,
   RealDivision,
+  LParen,
+  RParen,
   EOF,
 }
 
@@ -33,6 +35,8 @@ impl<'a> fmt::Display for Token {
       Token::Multiply => "*",
       Token::IntegerDivision => "DIV",
       Token::RealDivision => "/",
+      Token::LParen => "(",
+      Token::RParen => ")",
       Token::EOF => "EOF",
     };
     write!(f, "{}", output)

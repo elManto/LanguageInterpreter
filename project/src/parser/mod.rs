@@ -40,11 +40,54 @@ impl Parser {
 
 
   fn term(&mut self) -> i64 {
-    let token: tokenizer::token::Token = self.get_current_token();
-    self.eat(&token);
-    match token {
-      IntegerConst(value) => value.parse::<i64>().unwrap(),
-      _ => panic!("Not a number"),
+    let mut result: i64 = self.factor(); 
+    let mut token: tokenizer::token::Token = self.get_current_token();
+    //self.eat(&token);
+    while token == Multiply || token == IntegerDivision {
+      match token {
+        Multiply => {
+          self.eat(&token);
+          result =  result * self.factor();
+        }
+        IntegerDivision => {
+          self.eat(&token);
+          result = result / self.factor();
+        }
+        _ => panic!("Not a number"),
+      }
+      token = self.get_current_token();
+    }
+    result
+    
+  }
+
+  fn factor(&mut self) -> i64 {
+
+    let mut current_token = self.get_current_token();
+
+    match current_token {
+      //Plus | Minus => {
+      //  self.eat(&current_token);
+      //  
+      //}
+      IntegerConst(value) => {
+        current_token = self.get_current_token();
+        self.eat(&current_token);
+        value.parse::<i64>().unwrap()
+      }
+      LParen => {
+        self.eat(&LParen);
+        let result: i64 = self.expr();
+        self.eat(&RParen);
+        return result;
+      }
+        
+      //RealConst(value) => {
+      //  current_token = self.get_current_token();
+      //  self.eat(&current_token);
+      //  value
+      //}
+      _ => panic!("Unhandled case in `factor()` function"),
     }
   }
 
@@ -52,16 +95,17 @@ impl Parser {
     let mut token_to_pick: tokenizer::token::Token = self.get_current_token();
     let mut result: i64 = self.term();
     token_to_pick = self.get_current_token();
-    while token_to_pick == tokenizer::token::Token::Plus || token_to_pick == tokenizer::token::Token::Minus {
+    while token_to_pick == Plus || token_to_pick == Minus {
       match token_to_pick {
-        tokenizer::token::Token::Plus => {
+        Plus => {
           self.eat(&token_to_pick);
           result = result + self.term()
         },
-        tokenizer::token::Token::Minus => {
+        Minus => {
           self.eat(&token_to_pick);
           result = result - self.term()
         },
+        
         _ => println!("unimplemented operator"),
       }
       
@@ -70,19 +114,6 @@ impl Parser {
     return result;
   }
 
-  pub fn evaluate(&mut self) {
-    let left: tokenizer::token::Token = self.token.as_ref().unwrap().clone();
-    self.eat(&left);
-    let op: tokenizer::token::Token = self.token.as_ref().unwrap().clone();
-    self.eat(&op);
-
-    let right: tokenizer::token::Token = self.token.as_ref().unwrap().clone();
-    self.eat(&right);
-    println!("got operator {}", op);
-    println!("got operator {}", left);
-    println!("got operator {}", right);
-    
-  }
 
   
 
