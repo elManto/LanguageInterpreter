@@ -1,8 +1,21 @@
-#[path = "../tokenizer/mod.rs"]
-mod tokenizer;
-use tokenizer::token::Token;
-use tokenizer::token::Token::*;
-use tokenizer::Lexer;
+//#[path = "../tokenizer/mod.rs"]
+//mod tokenizer;
+//use tokenizer::token::Token;
+//use tokenizer::token::Token::*;
+//use tokenizer::Lexer;
+
+//use tokenizer::token::Token;
+//use tokenizer::token::Token::*;
+
+use crate::tokenizer::token::Token;
+use crate::tokenizer::token::Token::*;
+use crate::tokenizer;
+use crate::tokenizer::Lexer;
+
+
+#[path = "../ast/my_ast.rs"]
+mod my_ast;
+use my_ast::*;
 
 //#[path = "./token.rs"]
 //mod token;
@@ -39,29 +52,32 @@ impl Parser {
   }
 
 
-  fn term(&mut self) -> i64 {
-    let mut result: i64 = self.factor(); 
+  fn term(&mut self) -> Box<Node> {
+    //let mut result: i64 = self.factor(); 
+    let mut node = self.factor();
     let mut token: tokenizer::token::Token = self.get_current_token();
     //self.eat(&token);
     while token == Multiply || token == IntegerDivision {
       match token {
         Multiply => {
           self.eat(&token);
-          result =  result * self.factor();
+          //result =  result * self.factor();
+          node = Box::new(BinOpNode::new(node, self.factor(), token));
         }
         IntegerDivision => {
           self.eat(&token);
-          result = result / self.factor();
+          //result = result / self.factor();
+          node = Box::new(BinOpNode::new(node, self.factor(), token));
         }
         _ => panic!("Not a number"),
       }
       token = self.get_current_token();
     }
-    result
+    node
     
   }
 
-  fn factor(&mut self) -> i64 {
+  fn factor(&mut self) -> Box<Node> {
 
     let mut current_token = self.get_current_token();
 
@@ -73,13 +89,14 @@ impl Parser {
       IntegerConst(value) => {
         current_token = self.get_current_token();
         self.eat(&current_token);
-        value.parse::<i64>().unwrap()
+        //value.parse::<i64>().unwrap()
+        Box::new(NumNode::new(value.parse::<i64>().unwrap()))
       }
       LParen => {
         self.eat(&LParen);
-        let result: i64 = self.expr();
+        let node = self.expr();
         self.eat(&RParen);
-        return result;
+        return node;
       }
         
       //RealConst(value) => {
@@ -91,19 +108,22 @@ impl Parser {
     }
   }
 
-  pub fn expr(&mut self) -> i64 {
+  pub fn expr(&mut self) -> Box<Node> {
     let mut token_to_pick: tokenizer::token::Token = self.get_current_token();
-    let mut result: i64 = self.term();
+    //let mut result: i64 = self.term();
+     let mut node = self.term();
     token_to_pick = self.get_current_token();
     while token_to_pick == Plus || token_to_pick == Minus {
       match token_to_pick {
         Plus => {
           self.eat(&token_to_pick);
-          result = result + self.term()
+          node = Box::new(BinOpNode::new(node, self.term(), token_to_pick));
+          //result = result + self.term()
         },
         Minus => {
           self.eat(&token_to_pick);
-          result = result - self.term()
+          node = Box::new(BinOpNode::new(node, self.term(), token_to_pick));
+          //result = result - self.term()
         },
         
         _ => println!("unimplemented operator"),
@@ -111,7 +131,7 @@ impl Parser {
       
       token_to_pick = self.get_current_token();
     }
-    return result;
+    return node;
   }
 
 

@@ -1,3 +1,4 @@
+mod tokenizer;
 mod parser;
 
 use parser::Parser;
@@ -25,8 +26,9 @@ fn main() {
   println!("Processing file: {}", filename);
   let mut parser = parser::Parser::new(source.unwrap().as_str());
   //parser.evaluate();
-  let res: i64 = parser.expr();
-  println!("Result {}", res);
+  parser.expr();
+  //let res: i64 = parser.expr();
+  //println!("Result {}", res);
   //let mut lexer = lexer::Lexer::new(source.unwrap().as_str());
   //let mut token = lexer.get_next_token().unwrap();
   //let mut i = 0;
