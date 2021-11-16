@@ -78,6 +78,10 @@ impl Lexer {
           self.advance();
           token::Token::Plus
         }
+        '-' => {
+          self.advance();
+          token::Token::Minus
+        }
         unknown => {
           panic!("Unknown token: {}", self.current.unwrap())
         }
