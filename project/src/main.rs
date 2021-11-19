@@ -1,7 +1,12 @@
+#[macro_use]
+extern crate mopa;
+
 mod tokenizer;
 mod parser;
+mod interpreter;
 
-use parser::Parser;
+use interpreter::Interpreter;
+//use parser::Parser;
 use std::fs;
 use std::env;
 use std::fs::File;
@@ -21,31 +26,11 @@ fn main() {
   let filename = &args[1];
   let source = read_from_file(&filename);
 
-  
-
   println!("Processing file: {}", filename);
-  let mut parser = parser::Parser::new(source.unwrap().as_str());
-  //parser.evaluate();
-  parser.expr();
-  //let res: i64 = parser.expr();
-  //println!("Result {}", res);
-  //let mut lexer = lexer::Lexer::new(source.unwrap().as_str());
-  //let mut token = lexer.get_next_token().unwrap();
-  //let mut i = 0;
-  //while (i < 10) {
-  //  println!("Got token {}", token);
 
-  //  token = lexer.get_next_token().unwrap();
-  //  i += 1;
-  //}
-
-//  let mut interpreter = Interpreter::new(source.as_str());
-//  match interpreter.interpret() {
-//    Ok(Nil) => println!("Success!"),
-//    Ok(value) => println!("Program terminated with value: {:?}", value),
-//    Err(msg) => println!("!!!Error!!!: {}", msg),
-//  }
-
+  let mut interpreter = Interpreter::new(source.unwrap());
+  let r = interpreter.interpret();
+  println!("Result: {}", r);
 }
 
 

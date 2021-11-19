@@ -14,7 +14,7 @@ use crate::tokenizer::Lexer;
 
 
 #[path = "../ast/my_ast.rs"]
-mod my_ast;
+pub mod my_ast;
 use my_ast::*;
 
 //#[path = "./token.rs"]
