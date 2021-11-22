@@ -6,11 +6,7 @@ use mopa;
 pub trait Node: mopa::Any {
   fn accept(&mut self, visitor: &mut NodeVisitor);
 }
-mopafy!(Node);
-
-//pub struct Node {
-//  pub id: i64,
-//}
+mopafy!(Node);  // For dynamic typing
 
 
 // BinOpNode  
@@ -55,6 +51,28 @@ impl Node for NumNode {
   }
 }
 
+// UnaryNode
+
+pub struct UnaryNode {
+  pub operator: Token,
+  pub value: Box<Node>,
+}
+
+impl UnaryNode { 
+  pub fn new(operator: Token, value: Box<Node>) -> Self {
+    UnaryNode {
+      operator,
+      value,
+    } 
+  }
+}
+
+impl Node for UnaryNode {
+  fn accept(&mut self, visitor: &mut NodeVisitor) {
+    visitor.visit_unary(self);
+  }
+}
+
 // NodeVisitor
 
 pub trait NodeVisitor {
@@ -64,7 +82,11 @@ pub trait NodeVisitor {
 		}
     else if node.is::<BinOpNode>() {
       self.visit_binop(node.downcast_ref::<BinOpNode>().unwrap())
-    } else {
+    } 
+    else if node.is::<UnaryNode>() {
+      self.visit_unary(node.downcast_ref::<UnaryNode>().unwrap())
+    }
+    else {
       panic!("Unknown node found");
     }
   }
@@ -72,6 +94,8 @@ pub trait NodeVisitor {
   fn visit_integer(&mut self, node: &NumNode) -> i64;
 
   fn visit_binop(&mut self, node: &BinOpNode) -> i64;
+
+  fn visit_unary(&mut self, node: &UnaryNode) -> i64;
 
 }
 

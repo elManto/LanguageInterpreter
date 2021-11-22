@@ -5,7 +5,7 @@
 //use crate::ast::my_ast::{Node, NodeVisitor, BinOpNode, NumNode};
 
 use crate::parser::Parser;
-use crate::parser::my_ast::{Node, NodeVisitor, BinOpNode, NumNode};
+use crate::parser::my_ast::{Node, NodeVisitor, BinOpNode, NumNode, UnaryNode};
 
 
 pub struct Interpreter {
@@ -50,6 +50,24 @@ impl NodeVisitor for Interpreter {
     
     fn visit_integer(&mut self, node: &NumNode) -> i64 {
       node.value
+    }
+
+    fn visit_unary(&mut self, node: &UnaryNode) -> i64 {
+      let UnaryNode {operator, value} = node;
+      match operator {
+        Plus => self.visit(value),
+        Minus => (-1) * self.visit(value),
+        _ => panic!("Wrong Unary Operator"),
+      }
+      //if operator == Plus {
+      //  return self.visit(value);
+      //}
+      //else if operator == Minus {
+      //  return (-1) * self.visit(value);
+      //}
+      //else {
+      //  panic!("Wrong Unary Operator");
+      //}
     }
     
 }

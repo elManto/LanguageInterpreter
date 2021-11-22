@@ -82,10 +82,10 @@ impl Parser {
     let mut current_token = self.get_current_token();
 
     match current_token {
-      //Plus | Minus => {
-      //  self.eat(&current_token);
-      //  
-      //}
+      Plus | Minus => {
+        self.eat(&current_token);
+        Box::new(UnaryNode::new(current_token, self.factor()))
+      }
       IntegerConst(value) => {
         current_token = self.get_current_token();
         self.eat(&current_token);

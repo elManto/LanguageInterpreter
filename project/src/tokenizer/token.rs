@@ -14,16 +14,6 @@ pub enum Token {
   EOF,
 }
 
-//impl Copy for Token {
-//  fn copy(&self) -> Token {
-//    match self {
-//     Token::IntegerConst(value) => value.clone(),
-//     Token::RealConst(value) => value.clone(),
-//     _ => 
-//  
-//    }
-//  }
-//}
 
 impl<'a> fmt::Display for Token {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
@@ -42,10 +32,3 @@ impl<'a> fmt::Display for Token {
     write!(f, "{}", output)
   }
 }
-
-
-
-//pub struct Token {
-//  typ: String,
-//  value: String
-//}
