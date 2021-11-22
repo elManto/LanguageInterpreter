@@ -73,6 +73,98 @@ impl Node for UnaryNode {
   }
 }
 
+// CompoundNode i.e., list of statements
+
+pub struct CompoundNode {
+  pub children: Vec<Box<Node>>,
+}
+
+impl CompoundNode {
+  pub fn new(children: Vec<Box<Node>>) -> Self {
+    CompoundNode { children }
+  }
+}
+
+impl Node for CompoundNode {
+  fn accept(&mut self, visitor: &mut NodeVisitor) {
+    visitor.visit_compound(self);
+  }
+}
+
+// AssignNode 
+
+pub struct AssignNode {
+  pub identifier: Box<Node>,
+  pub expr: Box<Node>,
+  pub operator: Token,
+}
+
+impl AssignNode {
+  pub fn new(identifier: Box<Node>, expr: Box<Node>, operator: Token) -> Self {
+    AssignNode {
+      identifier,
+      expr,
+      operator,
+    }
+  }
+}
+
+impl Node for AssignNode {
+  fn accept(&mut self, visitor: &mut NodeVisitor) {
+    visitor.visit_assign(self);
+  }
+}
+
+// VarNode
+
+pub struct VarNode {
+  pub identifier: Token,
+}
+
+impl VarNode {
+  pub fn new(identifier: Token) -> Self {
+    VarNode { identifier }
+  }
+}
+
+impl Node for VarNode {
+  fn accept(&mut self, visitor: &mut NodeVisitor) {
+    visitor.visit_var(self);
+  }
+}
+
+// NoOpNode
+
+pub struct NoOpNode {}
+
+impl Node for NoOpNode {
+  fn accept(&mut self, visitor: &mut NodeVisitor) {
+    visitor.visit_noop(self);
+  }
+}
+
+// ProgramNode
+
+pub struct ProgramNode {
+  pub identifier: Token,
+  pub block: Box<Node>,
+}
+
+impl ProgramNode {
+  pub fn new(identifier: Token, block: Box<Node>) -> Self {
+    ProgramNode { identifier, block }
+  }
+}
+
+impl Node for ProgramNode {
+  fn accept(&mut self, visitor: &mut NodeVisitor) {
+    visitor.visit_program(self);
+  }
+}
+
+
+
+
 // NodeVisitor
 
 pub trait NodeVisitor {
@@ -86,6 +178,21 @@ pub trait NodeVisitor {
     else if node.is::<UnaryNode>() {
       self.visit_unary(node.downcast_ref::<UnaryNode>().unwrap())
     }
+    else if node.is::<ProgramNode>() {
+      self.visit_program(node.downcast_ref::<ProgramNode>().unwrap())
+    }
+    else if node.is::<NoOpNode>() {
+      self.visit_noop(node.downcast_ref::<NoOpNode>().unwrap())
+    }
+    else if node.is::<VarNode>() {
+      self.visit_var(node.downcast_ref::<VarNode>().unwrap())
+    }
+    else if node.is::<AssignNode>() {
+      self.visit_assign(node.downcast_ref::<AssignNode>().unwrap())
+    }
+    else if node.is::<CompoundNode>() {
+      self.visit_compound(node.downcast_ref::<CompoundNode>().unwrap())
+    }
     else {
       panic!("Unknown node found");
     }
@@ -97,6 +204,15 @@ pub trait NodeVisitor {
 
   fn visit_unary(&mut self, node: &UnaryNode) -> i64;
 
+  fn visit_program(&mut self, node: &ProgramNode) -> i64;
+
+  fn visit_noop(&mut self, node: &NoOpNode) -> i64;
+
+  fn visit_var(&mut self, node: &VarNode) -> i64;
+  
+  fn visit_assign(&mut self, node: &AssignNode) -> i64;
+
+  fn visit_compound(&mut self, node: &CompoundNode) -> i64;
 }
 
 

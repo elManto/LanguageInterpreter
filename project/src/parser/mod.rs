@@ -51,6 +51,79 @@ impl Parser {
     return self.token.clone().unwrap();
   }
 
+  fn program(&mut self) -> Box<Node> {
+    let node = self.compound_statement();
+    let token = self.get_current_token();
+    self.eat(&token);
+    node
+  }
+
+  fn compound_statement(&mut self) -> Box<Node> {
+    // compound_statement : Begin statement_list End
+    let mut token = self.get_current_token();
+    self.eat(&token); // BEGIN
+    let nodes = self.statement_list();
+    token = self.get_current_token();
+    self.eat(&token); // END
+    Box::new(CompoundNode::new(nodes))
+  }  
+
+  fn statement_list(&mut self) -> Vec<Box<Node>> {
+    //     statement_list : statement | statement SEMI statement_list 
+    let node = self.statement();
+    let mut results = vec![node];
+
+    while self.get_current_token() == Semi {
+      self.eat(&Semi);
+      results.append(&mut vec![self.statement()]);
+
+      if let Id(_) = self.get_current_token() {
+        panic!(
+          "Invalid token in statement list: {}",
+          self.get_current_token()
+        )
+      }
+    }
+    results
+  }
+
+  fn statement(&mut self) -> Box<Node> {
+    // statement : compound_statement
+    //           | assign_statement
+    //           | empty
+    match self.get_current_token() {
+      Begin => self.compound_statement(),
+      Id(_) => self.assignment_statement(),
+      _ => self.empty(),
+    }
+  }
+  
+
+  fn assignment_statement(&mut self) -> Box<Node> {
+    // assignment_statement : variable Assign expr
+    let left = self.variable();
+    let token = self.get_current_token();
+    self.eat(&token);
+    let right = self.expr();
+    let node = AssignNode::new(left, right, token);
+    Box::new(node)
+  }
+
+  fn variable(&mut self) -> Box<VarNode> {
+    // variable : Id
+    let token = self.get_current_token();
+    if let Id(_) = token {
+      self.eat(&token);
+      let node = VarNode::new(token);
+      Box::new(node)
+    } else {
+      panic!("Invalid variable");
+    }
+  }
+
+  fn empty(&self) -> Box<Node> {
+    Box::new(NoOpNode {})
+  }
 
   fn term(&mut self) -> Box<Node> {
     //let mut result: i64 = self.factor(); 
@@ -98,6 +171,9 @@ impl Parser {
         self.eat(&RParen);
         return node;
       }
+      Id(value) => {
+        self.variable()
+      }
         
       //RealConst(value) => {
       //  current_token = self.get_current_token();
@@ -133,6 +209,16 @@ impl Parser {
     }
     return node;
   }
+
+  pub fn parse(&mut self) -> Box<Node> {
+    let node = self.program();
+    let current_token = self.get_current_token();
+    if current_token != EOF {
+      panic!("Unexpected token found at end of file: {}", current_token);
+    }
+    node
+  }
+
 
 
   
