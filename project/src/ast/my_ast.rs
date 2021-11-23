@@ -1,4 +1,3 @@
-
 use crate::tokenizer::token::Token;
 
 use mopa;
@@ -7,6 +6,8 @@ pub trait Node: mopa::Any {
   fn accept(&mut self, visitor: &mut NodeVisitor);
 }
 mopafy!(Node);  // For dynamic typing
+
+
 
 
 // BinOpNode  
@@ -48,6 +49,24 @@ impl NumNode {
 impl Node for NumNode {
   fn accept(&mut self, visitor: &mut NodeVisitor) {
     visitor.visit_integer(self);
+  }
+}
+
+// FloatNode
+
+pub struct FloatNode {
+  pub value: f64,
+}
+
+impl FloatNode {
+  pub fn new(value: f64) -> Self {
+    FloatNode { value }
+  }
+}
+
+impl Node for FloatNode {
+  fn accept(&mut self, visitor: &mut NodeVisitor) {
+    visitor.visit_float(self);
   }
 }
 
@@ -162,7 +181,69 @@ impl Node for ProgramNode {
   }
 }
 
+// BlockNode
 
+pub struct BlockNode {
+  pub declarations: Vec<Box<Node>>,
+  pub compound_statement: Box<Node>,
+}
+
+impl BlockNode {
+  pub fn new(declarations: Vec<Box<Node>>, compound_statement: Box<Node>) -> Self {
+    BlockNode {
+      declarations,
+      compound_statement,
+    }
+  }
+}
+
+impl Node for BlockNode {
+  fn accept(&mut self, visitor: &mut NodeVisitor) {
+    visitor.visit_block(self);
+  }
+}
+
+// VarDeclNode
+
+pub struct VarDeclNode {
+  pub var_node: VarNode,
+  pub type_node: TypeNode,
+}
+
+impl VarDeclNode {
+  pub fn new(var_node: VarNode, type_node: TypeNode) -> Self {
+    VarDeclNode {
+      var_node,
+      type_node,
+    }
+  }
+}
+
+impl Node for VarDeclNode {
+  fn accept(&mut self, visitor: &mut NodeVisitor) {
+    visitor.visit_vardecl(self);
+  }
+}
+
+
+// TypeNode
+
+#[derive(Clone)]
+pub struct TypeNode {
+  pub token: Token,
+}
+
+impl TypeNode {
+  pub fn new(token: Token) -> Self {
+    TypeNode { token }
+  }
+}
+
+impl Node for TypeNode {
+  fn accept(&mut self, visitor: &mut NodeVisitor) {
+    visitor.visit_type(self);
+  }
+}
 
 
 // NodeVisitor
@@ -172,6 +253,9 @@ pub trait NodeVisitor {
     if node.is::<NumNode>() {
       self.visit_integer(node.downcast_ref::<NumNode>().unwrap())
 		}
+    else if node.is::<FloatNode>() {
+      self.visit_float(node.downcast_ref::<FloatNode>().unwrap())
+    }
     else if node.is::<BinOpNode>() {
       self.visit_binop(node.downcast_ref::<BinOpNode>().unwrap())
     } 
@@ -193,26 +277,32 @@ pub trait NodeVisitor {
     else if node.is::<CompoundNode>() {
       self.visit_compound(node.downcast_ref::<CompoundNode>().unwrap())
     }
+    else if node.is::<BlockNode>() {
+      self.visit_block(node.downcast_ref::<BlockNode>().unwrap())
+    }
+    else if node.is::<VarDeclNode>() {
+      self.visit_vardecl(node.downcast_ref::<VarDeclNode>().unwrap())
+    }
+    else if node.is::<TypeNode>() {
+      self.visit_type(node.downcast_ref::<TypeNode>().unwrap())
+    }
     else {
       panic!("Unknown node found");
     }
   }
 
   fn visit_integer(&mut self, node: &NumNode) -> i64;
-
+  fn visit_float(&mut self, node: &FloatNode) -> i64;
   fn visit_binop(&mut self, node: &BinOpNode) -> i64;
-
   fn visit_unary(&mut self, node: &UnaryNode) -> i64;
-
   fn visit_program(&mut self, node: &ProgramNode) -> i64;
-
   fn visit_noop(&mut self, node: &NoOpNode) -> i64;
-
   fn visit_var(&mut self, node: &VarNode) -> i64;
-  
   fn visit_assign(&mut self, node: &AssignNode) -> i64;
-
   fn visit_compound(&mut self, node: &CompoundNode) -> i64;
+  fn visit_block(&mut self, node: &BlockNode) -> i64;
+  fn visit_vardecl(&mut self, node: &VarDeclNode) -> i64;
+  fn visit_type(&mut self, node: &TypeNode) -> i64;
 }
 
 

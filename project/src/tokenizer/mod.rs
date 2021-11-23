@@ -40,6 +40,13 @@ impl Lexer {
     }
   }
 
+  fn skip_comments(&mut self) {
+    while self.current != None && self.current.unwrap() != '}' {
+      self.advance();
+    }
+    self.advance();
+  }
+
   pub fn next(&self) -> Option<char> {
     let pos = self.pos + 1;
     if pos > self.text.len() - 1 {
@@ -105,6 +112,11 @@ impl Lexer {
           self.skip_whitespace();
           continue;
         }
+        '{' => {
+          self.advance();
+          self.skip_comments();
+          continue;
+        }
         char if char.is_digit(10) => {
           let token = self.number();
           token
@@ -118,6 +130,14 @@ impl Lexer {
           self.advance();
           self.advance();
           token::Token::Assign
+        }
+        ':' => {
+          self.advance();
+          token::Token::Colon
+        }
+        ',' => {
+          self.advance();
+          token::Token::Comma
         }
         ';' => {
           self.advance();
@@ -141,7 +161,7 @@ impl Lexer {
         }
         '/' => {
           self.advance();
-          token::Token::IntegerDivision
+          token::Token::RealDivision
         }
         '(' => {
           self.advance();

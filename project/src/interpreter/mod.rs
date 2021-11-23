@@ -7,7 +7,7 @@
 use crate::parser::Parser;
 //use crate::parser::my_ast::{Node, NodeVisitor, BinOpNode, NumNode, UnaryNode};
 use crate::parser::my_ast::*;
-use crate::tokenizer::token::Token::{Id, Multiply, Plus, IntegerDivision, Minus};
+use crate::tokenizer::token::Token::{Id, Multiply, Plus, IntegerDivision, Minus, RealDivision};
 
 use std::collections::HashMap;
 
@@ -60,8 +60,14 @@ impl NodeVisitor for Interpreter {
         lhs + rhs
       }
       else if *operator == IntegerDivision{ 
-        println!("Division -> {}", operator);
+        println!("Real Division -> {}", operator);
         lhs / rhs
+      }
+      else if *operator == RealDivision {
+        println!("Float Division -> {}", operator);
+        let float_res = lhs as f64 / rhs as f64;
+        //TODO Also here improve in the case the RealDivision is computed and you get a float
+        float_res as i64
       }
       else if *operator == Minus {
         println!("Minus -> {}", operator);
@@ -75,6 +81,26 @@ impl NodeVisitor for Interpreter {
     
     fn visit_integer(&mut self, node: &NumNode) -> i64 {
       node.value
+    }
+
+    fn visit_float(&mut self, node: &FloatNode) -> i64 {
+      // Dirty hack to make the things work TODO create a struct Result and store results into this
+      node.value as i64
+    }
+
+    fn visit_block(&mut self, node: &BlockNode) -> i64 {
+      for declaration in &node.declarations {
+        self.visit(&declaration);
+      }
+      self.visit(&node.compound_statement)
+    }
+
+    fn visit_vardecl(&mut self, node: &VarDeclNode) -> i64 {
+      -1
+    }
+
+    fn visit_type(&mut self, node: &TypeNode) -> i64 {
+      -1
     }
 
     fn visit_unary(&mut self, node: &UnaryNode) -> i64 {
