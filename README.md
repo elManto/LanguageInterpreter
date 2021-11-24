@@ -1,5 +1,5 @@
 # LanguageInterpreter
-A Language Interpreter written in Rust
+A Language Interpreter written in Rust inspired to [this](https://ruslanspivak.com/lsbasi-part1/).
 
 The purpose of the project is only to improve my knowledge of the Rust language, but this can be used to learn the basics of language interpreters.
 
